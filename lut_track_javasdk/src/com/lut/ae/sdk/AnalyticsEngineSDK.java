@@ -17,7 +17,7 @@ public class AnalyticsEngineSDK {
 	// 日志打印对象
 	private static final Logger log = Logger.getGlobal();
 	// 请求url的主体部分
-	private static final String accessUrl = "http://192.168.83.142/BfImg.gif";
+	public static final String accessUrl = "http://192.168.83.142/BfImg.gif";
 	private static final String platformName = "java_server";
 	private static final String sdkName = "jdk";
 	private static final String version = "1";
@@ -35,7 +35,7 @@ public class AnalyticsEngineSDK {
 		try {
 			if (isEmpty(orderId) || isEmpty(memberId)) {
 				// 订单id或者会员id为空
-				log.log(Level.WARNING, "订单id或者会员id不能为空");
+				log.log(Level.WARNING, "订单id和会员id不能为空");
 				return false;
 			}
 			// 代码执行到这里，表示订单id和会员id都不为空
@@ -71,7 +71,7 @@ public class AnalyticsEngineSDK {
 		try {
 			if (isEmpty(orderId) || isEmpty(memberId)) {
 				// 订单id或者会员id为空
-				log.log(Level.WARNING, "订单id或者会员id不能为空");
+				log.log(Level.WARNING, "订单id和会员id不能为空");
 				return false;
 			}
 			// 代码执行到这里，表示订单id和会员id都不为空
@@ -123,8 +123,14 @@ public class AnalyticsEngineSDK {
 	private static boolean isEmpty(String value){
 		return value == null || value.trim().isEmpty();
 	}
-	
-	private static boolean isNotEmpty(String value){
+
+	/**
+	 * 判断字符串是否非空，如果不是空，返回true。如果是空，返回false。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	private static boolean isNotEmpty(String value) {
 		return !isEmpty(value);
 	}
 }

@@ -39,13 +39,15 @@ public class SendDataMonitor {
 				if (monitor == null) {
 					monitor = new SendDataMonitor();
 					Thread thread = new Thread(new Runnable() {
+
+						@Override
 						public void run() {
 							// 线程中调用具体的处理方法
 							SendDataMonitor.monitor.run();
 						}
 					});
 					// 测试的时候，不设置为守护模式
-					// thread.setDaemon(true);
+					//thread.setDaemon(true);
 					thread.start();
 				}
 			}
@@ -57,7 +59,7 @@ public class SendDataMonitor {
 	 * 具体执行发送url的方法
 	 * 
 	 */
-	protected void run() {
+	private void run() {
 		while (true) {
 			try {
 				String url = this.queue.take();
