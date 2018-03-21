@@ -1,6 +1,9 @@
 package com.lut.etl.util;
 
+import java.io.File;
 import java.io.IOException;
+
+import com.lut.util.EJob;
 
 import cz.mallat.uasparser.OnlineUpdater;
 import cz.mallat.uasparser.UASparser;
@@ -21,6 +24,7 @@ public class UserAgentUtil {
 			e.printStackTrace();
 		}
 	}
+	
 	/**
 	 * 解析浏览器的user agent字符串，返回UserAgentInfo对象。<br/>
 	 * 如果user agent为空，返回null。如果解析失败，也直接返回null。
@@ -85,7 +89,7 @@ public class UserAgentUtil {
 		}
 		@Override
 		public String toString() {
-			return "UserAgentInfo [browserName=" + browserName + ", browserVersion=" + browserVersion + ", osName="
+			return "UserAgentInformation [browserName=" + browserName + ", browserVersion=" + browserVersion + ", osName="
 					+ osName + ", osVersion=" + osVersion + "]";
 		}
 		
