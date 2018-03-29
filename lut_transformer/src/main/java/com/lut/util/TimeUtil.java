@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.lut.common.DateEnum;
+
 /**
  * 时间控制工具类
  * 
@@ -132,6 +134,59 @@ public class TimeUtil {
 			}
 		}
 		return null;
+	}
+	/**
+     * 从时间戳中获取需要的时间信息
+     * 
+     * @param time
+     *            时间戳
+     * @param type
+     * @return 如果没有匹配的type，抛出异常信息
+     */
+	public static int getDateInfo(long time, DateEnum type) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		if(DateEnum.YEAR.equals(type)){
+			//需要的是年份信息
+			return calendar.get(Calendar.YEAR);
+		}else if(DateEnum.SEASON.equals(type)){
+			//需要的是季度信息
+			int month = calendar.get(Calendar.MONTH) + 1;
+			if(month % 3 == 0){
+				return month / 3;
+			}
+			return month / 3 + 1;
+		}else if(DateEnum.MONTH.equals(type)){
+			//需要月份信息
+			return calendar.get(Calendar.MONTH) + 1;
+		}else if(DateEnum.WEEK.equals(type)){
+			//需要周信息
+			return calendar.get(Calendar.WEEK_OF_YEAR);
+		}else if(DateEnum.DAY.equals(type)){
+			//需要天信息
+			return calendar.get(Calendar.DAY_OF_MONTH);
+		}else if(DateEnum.HOUR.equals(type)){
+			//需要小时信息
+			return calendar.get(Calendar.HOUR_OF_DAY);
+		}
+		throw new RuntimeException("没有对应的事件类型" + type);
+	}
+	
+	/**
+     * 获取time指定周的第一天的时间戳值
+     * 
+     * @param time
+     * @return
+     */
+	public static long getFirstDayOfThisWeek(long time){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		calendar.set(Calendar.DAY_OF_WEEK, 1);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		return calendar.getTimeInMillis();
 	}
 
 }
