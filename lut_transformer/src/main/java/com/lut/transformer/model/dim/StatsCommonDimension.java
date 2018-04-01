@@ -1,4 +1,4 @@
-package com.lut.transformer.model.dim.base.dim;
+package com.lut.transformer.model.dim;
 
 import java.io.DataInput;
 import java.io.DataOutput;

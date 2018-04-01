@@ -5,7 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import com.lut.common.KpiType;
-import com.lut.transformer.model.dim.base.dim.BaseStatsValueWritable;
+import com.lut.transformer.model.value.BaseStatsValueWritable;
 
 public class TimeOutputValue extends BaseStatsValueWritable{
 	private String id;//id

@@ -184,7 +184,8 @@ public class DimensionConverterImpl implements IDimensionConverter{
      * @return
      * @throws SQLException
      */
-    private int executeSql(Connection conn,String cacheKey,String[] sqls,BaseDimension dimension) throws SQLException{
+    @SuppressWarnings("resource")
+	private int executeSql(Connection conn,String cacheKey,String[] sqls,BaseDimension dimension) throws SQLException{
     	PreparedStatement pstmt = null;
     	ResultSet rs = null;
     	try {

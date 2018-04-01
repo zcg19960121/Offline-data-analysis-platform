@@ -8,7 +8,7 @@ import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.WritableUtils;
 
 import com.lut.common.KpiType;
-import com.lut.transformer.model.dim.base.dim.BaseStatsValueWritable;
+import com.lut.transformer.model.value.BaseStatsValueWritable;
 
 public class MapWritableValue extends BaseStatsValueWritable{
 	private MapWritable value = new MapWritable();
