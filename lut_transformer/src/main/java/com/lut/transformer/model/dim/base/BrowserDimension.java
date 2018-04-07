@@ -10,6 +10,12 @@ import org.apache.commons.lang.StringUtils;
 
 import com.lut.common.GlobalConstants;
 
+/**
+ * 浏览器维度
+ * 
+ * @author gg
+ *
+ */
 public class BrowserDimension extends BaseDimension {
 	private int id;//id
 	private String browserName;//名称
@@ -45,7 +51,7 @@ public class BrowserDimension extends BaseDimension {
      * @param browserVersion
      * @return
      */
-	public static List<BrowserDimension> bulidList(String browserName,String browserVersion){
+	public static List<BrowserDimension> buildList(String browserName,String browserVersion){
 		List<BrowserDimension> list = new ArrayList<>();
 		if(StringUtils.isBlank(browserName)){
 			//如果浏览器名称为空，那么设置unknown
@@ -55,7 +61,7 @@ public class BrowserDimension extends BaseDimension {
 		if(StringUtils.isEmpty(browserVersion)){
 			browserVersion = GlobalConstants.DEFAULT_VALUE;
 		}
-		list.add(BrowserDimension.newInstance(browserName, GlobalConstants.DEFAULT_VALUE));
+		list.add(BrowserDimension.newInstance(browserName, GlobalConstants.VALUE_OF_ALL));
 		list.add(BrowserDimension.newInstance(browserName, browserVersion));
 		return list;
 	}
@@ -118,7 +124,7 @@ public class BrowserDimension extends BaseDimension {
 		tmp = this.browserVersion.compareTo(other.browserVersion);
 		return tmp;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -128,37 +134,30 @@ public class BrowserDimension extends BaseDimension {
 		result = prime * result + id;
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if(this == obj){
+		if (this == obj)
 			return true;
-		}
-		if(obj == null){
+		if (obj == null)
 			return false;
-		}
-		if(getClass() != obj.getClass()){
+		if (getClass() != obj.getClass())
 			return false;
-		}
 		BrowserDimension other = (BrowserDimension) obj;
-		if(browserName == null){
-			if(other.browserName != null){
+		if (browserName == null) {
+			if (other.browserName != null)
 				return false;
-			}
-		}else if(!browserName.equals(other.browserName)){
+		} else if (!browserName.equals(other.browserName))
 			return false;
-		}
-		if(browserVersion == null){
-			if(other.browserVersion != null){
+		if (browserVersion == null) {
+			if (other.browserVersion != null)
 				return false;
-			}
-		}else if(!browserVersion.equals(other.browserVersion)){
+		} else if (!browserVersion.equals(other.browserVersion))
 			return false;
-		}
-		if(id != other.id){
+		if (id != other.id)
 			return false;
-		}
 		return true;
 	}
-
+	
+	
 }

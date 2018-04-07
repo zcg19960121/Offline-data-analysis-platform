@@ -169,7 +169,7 @@ public class TimeUtil {
 			//需要小时信息
 			return calendar.get(Calendar.HOUR_OF_DAY);
 		}
-		throw new RuntimeException("没有对应的事件类型" + type);
+		throw new RuntimeException("没有对应的时间类型:" + type);
 	}
 	
 	/**

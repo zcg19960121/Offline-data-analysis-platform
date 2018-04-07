@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.lut.common.GlobalConstants;
 
@@ -31,7 +31,7 @@ public class PlatformDimension extends BaseDimension{
 		this.platformName = platformName;
 	}
 	
-	public static List<PlatformDimension> builtList(String platformName){
+	public static List<PlatformDimension> buildList(String platformName){
 		if(StringUtils.isBlank(platformName)){
 			platformName = GlobalConstants.DEFAULT_VALUE;
 		}

@@ -39,12 +39,11 @@ public class KpiDimension extends BaseDimension{
 		this.kpiName = kpiName;
 	}
 
-	@Override
-	public void write(DataOutput out) throws IOException {
-		out.writeInt(this.id);
-		out.writeUTF(kpiName);
-		
-	}
+    @Override
+    public void write(DataOutput out) throws IOException {
+        out.writeInt(this.id);
+        out.writeUTF(this.kpiName);
+    }
 
 	@Override
 	public void readFields(DataInput in) throws IOException {

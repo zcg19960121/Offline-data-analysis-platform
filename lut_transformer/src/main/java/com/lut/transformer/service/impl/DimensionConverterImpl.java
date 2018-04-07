@@ -11,7 +11,6 @@ import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.hadoop.hdfs.server.datanode.browseBlock_jsp;
 import org.apache.log4j.Logger;
 
 import com.lut.transformer.model.dim.base.BaseDimension;
@@ -23,10 +22,15 @@ import com.lut.transformer.service.IDimensionConverter;
 public class DimensionConverterImpl implements IDimensionConverter{
 	private static final Logger logger = Logger.getLogger(DimensionConverterImpl.class);
 	private static final String DRIVER = "com.mysql.jdbc.Driver";
-	private static final String URL = "jdbc:mysql:/hadoop-work:3306/report";
+	private static final String URL = "jdbc:mysql://hadoop-work:3306/report";
 	private static final String USERNAME = "hive";
 	private static final String PASSWORD = "hive";
 	private Map<String,Integer> cache = new LinkedHashMap<String,Integer>(){
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 4217249221112794768L;
+
 		protected boolean removeEldestEntry(Map.Entry<String,Integer> eldest){
 			return this.size() > 5000;
 		};
@@ -66,7 +70,7 @@ public class DimensionConverterImpl implements IDimensionConverter{
 			}
 			return id;
 		} catch (Throwable e) {
-			logger.error("数据库出现异常",e);
+			logger.error("操作数据库出现异常",e);
 			throw new IOException(e);
 		}finally{
 			if(conn != null){
@@ -212,6 +216,7 @@ public class DimensionConverterImpl implements IDimensionConverter{
 				} catch (Throwable e) {
 					// nothing
 				}
+}
     			if(pstmt != null){
     				try {
 						pstmt.close();
@@ -220,7 +225,7 @@ public class DimensionConverterImpl implements IDimensionConverter{
 					}
     			}
     		}
-    	}
+    	
     	throw new RuntimeException("从数据库获取id失败");
     }
 }

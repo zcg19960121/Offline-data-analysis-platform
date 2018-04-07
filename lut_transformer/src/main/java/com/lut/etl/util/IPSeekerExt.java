@@ -1,5 +1,6 @@
 package com.lut.etl.util;
 
+import com.lut.common.GlobalConstants;
 import com.lut.etl.util.ip.IPSeeker;
 
 /**
@@ -28,12 +29,11 @@ public class IPSeekerExt extends IPSeeker{
 		RegionInfo info = new RegionInfo();
 		try {
 			String country = super.getCountry(ip);
-			if("局域网".equals(country)){
-				info.setCountry("中国");
-				info.setProvince("上海市");
-			}
-			if(country != null && !country.trim().isEmpty()){
-				//表示该ip是一个可以解析的ip
+			if ("局域网".equals(country)) {
+			    info.setCountry("中国");
+			    info.setProvince("上海市");
+			} else if (country != null && !country.trim().isEmpty()) {
+				// 表示该ip还一个可以解析的ip
 				country = country.trim();
 				int length = country.length();
 				int index = country.indexOf('省');
@@ -129,8 +129,8 @@ public class IPSeekerExt extends IPSeeker{
 	 * @author gg
 	 *
 	 */
-	public static class RegionInfo{
-		public static final String DEFAULT_VALUE = "unknown"; // 默认值
+	public static class RegionInfo {
+		public static final String DEFAULT_VALUE = GlobalConstants.DEFAULT_VALUE; // 默认值
 		private String country = DEFAULT_VALUE; // 国家
 		private String province = DEFAULT_VALUE; // 省份
 		private String city = DEFAULT_VALUE; // 城市

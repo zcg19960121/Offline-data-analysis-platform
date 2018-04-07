@@ -114,6 +114,11 @@ public class EventLogConstants {
      * 浏览器分辨率大小
      */
     public static final String LOG_COLUMN_NAME_RESOLUTION = "b_rst";
+
+    /**
+     * 定义platform
+     */
+    public static final String LOG_COLUMN_NAME_PLATFORM = "pl";
     /**
      * 当前url
      */

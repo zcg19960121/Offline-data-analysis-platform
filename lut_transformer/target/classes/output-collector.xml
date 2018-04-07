@@ -3,11 +3,11 @@
 <configuration>
 	<property>
 		<name>collector_new_install_user</name>
-		<value>com.beifeng.transformer.mr.nu.StatsUserNewInstallUserCollector</value>
+		<value>com.lut.transformer.mr.nu.StatsUserNewInstallUserCollector</value>
 	</property>
 
 	<property>
 		<name>collector_browser_new_install_user</name>
-		<value>com.beifeng.transformer.mr.nu.StatsDeviceBrowserNewInstallUserCollector</value>
+		<value>com.lut.transformer.mr.nu.StatsDeviceBrowserNewInstallUserCollector</value>
 	</property>
 </configuration>

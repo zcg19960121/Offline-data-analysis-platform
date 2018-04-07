@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.hadoop.hive.ql.parse.HiveParser.databaseComment_return;
-import org.apache.hadoop.hive.ql.txn.compactor.Cleaner;
 
 import com.lut.common.DateEnum;
 import com.lut.util.TimeUtil;
@@ -36,47 +34,47 @@ public class DateDimension extends BaseDimension {
      *            类型
      * @return
      */
-	public static DateDimension buildDate(long time,DateEnum type){
-		int year = TimeUtil.getDateInfo(time,DateEnum.YEAR);
-		Calendar calendar = Calendar.getInstance();
-		calendar.clear();
-		if(DateEnum.YEAR.equals(type)){
-			calendar.set(year,0,1);
-			return new DateDimension(year,0,0,0,0,type.name,calendar.getTime());
-		}
-		int season = TimeUtil.getDateInfo(time,DateEnum.SEASON);
-		if(DateEnum.SEASON.equals(type)){
-			int month = 3 * season - 2;
-			calendar.set(year,month - 1,1);
-			return new DateDimension(year,season,0,0,0,type.name,calendar.getTime());
-		}
-		int month = TimeUtil.getDateInfo(time, DateEnum.MONTH);
-		if(DateEnum.MONTH.equals(type)){
-			calendar.set(year, month - 1,1);
-			return new DateDimension(year,season,month,0,0,type.name,calendar.getTime());
-		}
-		int week = TimeUtil.getDateInfo(time, DateEnum.WEEK);
-		if(DateEnum.WEEK.equals(type)){
-			long firstDayOfWeek = TimeUtil.getFirstDayOfThisWeek(time);//获取指定时间戳所属周的第一天时间戳
-			year = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.YEAR);
-			season = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.SEASON);
-			month = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.MONTH);
-			week = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.WEEK);
-			if(month == 12 && week == 1){
-				week = 53;
-			}
-			return new DateDimension(year,season,month,week,0,type.name,new Date(firstDayOfWeek));
-		}
-		int day = TimeUtil.getDateInfo(time, DateEnum.DAY);
-		if(DateEnum.DAY.equals(type)){
-			calendar.set(year, month - 1,day);
-			if(month == 12 && week == 1){
-				week = 53;
-			}
-			return new DateDimension(year,season,month,week,day,type.name,calendar.getTime());
-		}
-		throw new RuntimeException("不支持所要求的dateEnum类型来获取datedimension对象" + type);
-	}
+    public static DateDimension buildDate(long time, DateEnum type) {
+        int year = TimeUtil.getDateInfo(time, DateEnum.YEAR);
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        if (DateEnum.YEAR.equals(type)) {
+            calendar.set(year, 0, 1);
+            return new DateDimension(year, 0, 0, 0, 0, type.name, calendar.getTime());
+        }
+        int season = TimeUtil.getDateInfo(time, DateEnum.SEASON);
+        if (DateEnum.SEASON.equals(type)) {
+            int month = (3 * season - 2);
+            calendar.set(year, month - 1, 1);
+            return new DateDimension(year, season, 0, 0, 0, type.name, calendar.getTime());
+        }
+        int month = TimeUtil.getDateInfo(time, DateEnum.MONTH);
+        if (DateEnum.MONTH.equals(type)) {
+            calendar.set(year, month - 1, 1);
+            return new DateDimension(year, season, month, 0, 0, type.name, calendar.getTime());
+        }
+        int week = TimeUtil.getDateInfo(time, DateEnum.WEEK);
+        if (DateEnum.WEEK.equals(type)) {
+            long firstDayOfWeek = TimeUtil.getFirstDayOfThisWeek(time); // 获取指定时间戳所属周的第一天时间戳
+            year = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.YEAR);
+            season = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.SEASON);
+            month = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.MONTH);
+            week = TimeUtil.getDateInfo(firstDayOfWeek, DateEnum.WEEK);
+            if (month == 12 && week == 1) {
+                week = 53;
+            }
+            return new DateDimension(year, season, month, week, 0, type.name, new Date(firstDayOfWeek));
+        }
+        int day = TimeUtil.getDateInfo(time, DateEnum.DAY);
+        if (DateEnum.DAY.equals(type)) {
+            calendar.set(year, month - 1, day);
+            if (month == 12 && week == 1) {
+                week = 53;
+            }
+            return new DateDimension(year, season, month, week, day, type.name, calendar.getTime());
+        }
+        throw new RuntimeException("不支持所要求的dateEnum类型来获取datedimension对象" + type);
+    }
 
 	public DateDimension() {
 		super();
@@ -236,48 +234,57 @@ public class DateDimension extends BaseDimension {
         tmp = this.type.compareTo(other.type);
         return tmp;
 	}
-	
-	@Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + day;
-        result = prime * result + id;
-        result = prime * result + month;
-        result = prime * result + season;
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + week;
-        result = prime * result + year;
-        return result;
-    }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DateDimension other = (DateDimension) obj;
-        if (day != other.day)
-            return false;
-        if (id != other.id)
-            return false;
-        if (month != other.month)
-            return false;
-        if (season != other.season)
-            return false;
-        if (type == null) {
-            if (other.type != null)
-                return false;
-        } else if (!type.equals(other.type))
-            return false;
-        if (week != other.week)
-            return false;
-        if (year != other.year)
-            return false;
-        return true;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((calendar == null) ? 0 : calendar.hashCode());
+		result = prime * result + day;
+		result = prime * result + id;
+		result = prime * result + month;
+		result = prime * result + season;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + week;
+		result = prime * result + year;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DateDimension other = (DateDimension) obj;
+		if (calendar == null) {
+			if (other.calendar != null)
+				return false;
+		} else if (!calendar.equals(other.calendar))
+			return false;
+		if (day != other.day)
+			return false;
+		if (id != other.id)
+			return false;
+		if (month != other.month)
+			return false;
+		if (season != other.season)
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		if (week != other.week)
+			return false;
+		if (year != other.year)
+			return false;
+		return true;
+	}
+	
+
+   
 
 }
