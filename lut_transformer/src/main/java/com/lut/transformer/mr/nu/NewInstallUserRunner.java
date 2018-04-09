@@ -1,6 +1,5 @@
 package com.lut.transformer.mr.nu;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -21,13 +20,12 @@ import org.apache.hadoop.hbase.filter.MultipleColumnPrefixFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
-
+import com.google.common.collect.Lists;
 import com.lut.common.DateEnum;
 import com.lut.common.EventLogConstants;
 import com.lut.common.EventLogConstants.EventEnum;
@@ -37,10 +35,8 @@ import com.lut.transformer.model.dim.base.DateDimension;
 import com.lut.transformer.model.value.map.TimeOutputValue;
 import com.lut.transformer.model.value.reduce.MapWritableValue;
 import com.lut.transformer.mr.TransformerOutputFormat;
-import com.lut.util.EJob;
 import com.lut.util.JdbcManager;
 import com.lut.util.TimeUtil;
-import com.google.common.collect.Lists;
 
 /**
  * 计算新增用户入口类
