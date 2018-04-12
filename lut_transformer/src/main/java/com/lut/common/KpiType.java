@@ -15,6 +15,8 @@ public enum KpiType {
     NEW_MEMBER("new_member"), // 统计新增会员kpi
     BROWSER_NEW_MEMBER("browser_new_member"), // 统计浏览器维度新增会员kpi
     INSERT_MEMBER_INFO("insert_member_info"), // 插入会员信息kpi
+    SESSIONS("sessions"), // 统计会话kpi
+    BROWSER_SESSIONS("browser_sessions"), // 统计浏览器维度会话kpi
     ;
 
     public final String name;
