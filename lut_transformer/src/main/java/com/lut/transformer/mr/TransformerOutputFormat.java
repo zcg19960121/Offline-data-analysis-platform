@@ -114,41 +114,39 @@ public class TransformerOutputFormat extends OutputFormat<BaseDimension, BaseSta
 			
 		}
 
-		@Override
-		public void close(TaskAttemptContext context) throws IOException, InterruptedException {
-			try {
-				for(Map.Entry<KpiType, PreparedStatement> entry : this.map.entrySet()){
-					entry.getValue().executeBatch();
-				}
-			} catch (SQLException e) {
-				logger.error("执行executeUpdate方法异常",e);
-				throw new IOException(e);
-			} finally{
-				try {
-					if(conn != null){
-						conn.commit();//进行connection的提交动作
-					}
-				} catch (Exception e) {
-					//nothing
-				}finally{
-					for(Map.Entry<KpiType, PreparedStatement> entry : this.map.entrySet()){
-						try {
-							entry.getValue().close();
-						} catch (SQLException e) {
-							// nothing
-						}
-					}
-					if(conn != null){
-						try {
-							conn.close();
-						} catch (Exception e) {
-							// nothing
-						}
-					}
-				}
-			}
-		}
-		
-	}
+        @Override
+        public void close(TaskAttemptContext context) throws IOException, InterruptedException {
+            try {
+                for (Map.Entry<KpiType, PreparedStatement> entry : this.map.entrySet()) {
+                    entry.getValue().executeBatch();
+                }
+            } catch (SQLException e) {
+                logger.error("执行executeUpdate方法异常", e);
+                throw new IOException(e);
+            } finally {
+                try {
+                    if (conn != null) {
+                        conn.commit(); // 进行connection的提交动作
+                    }
+                } catch (Exception e) {
+                    // nothing
+                } finally {
+                    for (Map.Entry<KpiType, PreparedStatement> entry : this.map.entrySet()) {
+                        try {
+                            entry.getValue().close();
+                        } catch (SQLException e) {
+                            // nothing
+                        }
+                    }
+                    if (conn != null)
+                        try {
+                            conn.close();
+                        } catch (Exception e) {
+                            // nothing
+                        }
+                }
+            }
+        }
 
+    }
 }

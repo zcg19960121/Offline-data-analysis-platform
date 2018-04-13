@@ -10,6 +10,12 @@ import org.apache.commons.lang.StringUtils;
 
 import com.lut.common.GlobalConstants;
 
+/**
+ * 平台维度类
+ * 
+ * @author gg
+ *
+ */
 public class PlatformDimension extends BaseDimension{
 	private int id;
 	private String platformName;

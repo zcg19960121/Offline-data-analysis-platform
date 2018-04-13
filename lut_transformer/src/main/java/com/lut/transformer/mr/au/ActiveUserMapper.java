@@ -36,9 +36,9 @@ public class ActiveUserMapper extends TableMapper<StatsUserDimension, TimeOutput
     private BrowserDimension defaultBrowser = new BrowserDimension("", ""); // 默认的browser对象
     private KpiDimension activeUserKpi = new KpiDimension(KpiType.ACTIVE_USER.name);
     private KpiDimension activeUserOfBrowserKpi = new KpiDimension(KpiType.BROWSER_ACTIVE_USER.name);
-
+    private KpiDimension hourlyActiveUserKpi = new KpiDimension(KpiType.HOURLY_ACTIVE_USER.name);
 	
-	
+		
 	@Override
 	protected void map(ImmutableBytesWritable key, Result value,
 			Context context)
@@ -55,10 +55,11 @@ public class ActiveUserMapper extends TableMapper<StatsUserDimension, TimeOutput
 		}
 		long longOfServerTime = Long.valueOf(serverTime.trim());
 		DateDimension dateDimension = DateDimension.buildDate(longOfServerTime, DateEnum.DAY);
-		this.outputValue.setId(uuid);
+		this.outputValue.setId(uuid);// 设置用户id
+		this.outputValue.setTime(longOfServerTime); // 设置访问的服务器时间，可以用来计算该用户访问的时间是哪个时间段。
 		
 		//进行platform的构建
-		List<PlatformDimension> platforms = PlatformDimension.buildList(platform);
+		List<PlatformDimension> platforms = PlatformDimension.buildList(platform);// 进行platform创建
 		
 		//获取browser name和browser version
 		String browser = Bytes.toString(value.getValue(family, Bytes.toBytes(EventLogConstants.LOG_COLUMN_NAME_BROWSER_NAME)));
@@ -73,10 +74,14 @@ public class ActiveUserMapper extends TableMapper<StatsUserDimension, TimeOutput
 			this.outputKey.setBrowser(defaultBrowser);//进行覆盖操作
 			//设置platform dimension
 			statsCommonDimension.setPlatform(pf);
+			// 输出active user的键值对
 			//设置kpi dimension
 			statsCommonDimension.setKpi(activeUserKpi);
 			context.write(this.outputKey, this.outputValue);
 			
+            // 输出hourly active user的键值对
+            statsCommonDimension.setKpi(this.hourlyActiveUserKpi);
+            context.write(this.outputKey, this.outputValue);
 			//输出browser维度统计
 			statsCommonDimension.setKpi(activeUserOfBrowserKpi);
 			for(BrowserDimension bw : browsers){

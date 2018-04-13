@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import com.lut.transformer.model.dim.base.BaseDimension;
 import com.lut.transformer.model.dim.base.BrowserDimension;
 import com.lut.transformer.model.dim.base.DateDimension;
+import com.lut.transformer.model.dim.base.KpiDimension;
 import com.lut.transformer.model.dim.base.PlatformDimension;
 import com.lut.transformer.service.IDimensionConverter;
 
@@ -53,37 +54,40 @@ public class DimensionConverterImpl implements IDimensionConverter{
 		try {
 			// 1. 查看数据库中是否有对应的值，有则返回
             // 2. 如果第一步中，没有值；先插入我们dimension数据， 获取id
-			String[] sql = null;//具体要执行的sql数组
-			if(dimension instanceof DateDimension){
-				sql = this.buildDateSql();
-			}else if(dimension instanceof PlatformDimension){
-				sql = this.buildPlatformSql();
-			}else if(dimension instanceof BrowserDimension){
-				sql = this.buildBrowserSql();
-			}else{
-				throw new IOException("不支持此dimensionid的获取:" + dimension.getClass());
-			}
-			conn = this.getConnection();//获取连接
-			int id = 0;
-			synchronized (this) {
-				id = this.executeSql(conn,cacheKey,sql,dimension);
-			}
-			return id;
-		} catch (Throwable e) {
-			logger.error("操作数据库出现异常",e);
-			throw new IOException(e);
-		}finally{
-			if(conn != null){
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					//nothing
-				}
-			}
-		}
-	}
-	
-	/**
+            String[] sql = null; // 具体执行sql数组
+            if (dimension instanceof DateDimension) {
+                sql = this.buildDateSql();
+            } else if (dimension instanceof PlatformDimension) {
+                sql = this.buildPlatformSql();
+            } else if (dimension instanceof BrowserDimension) {
+                sql = this.buildBrowserSql();
+            } else if (dimension instanceof KpiDimension) {
+                sql = this.buildKpiSql();
+            } else {
+                throw new IOException("不支持此dimensionid的获取:" + dimension.getClass());
+            } 
+
+            conn = this.getConnection(); // 获取连接
+            int id = 0;
+            synchronized (this) {
+                id = this.executeSql(conn, cacheKey, sql, dimension);
+            }
+            return id;
+        } catch (Throwable e) {
+            logger.error("操作数据库出现异常", e);
+            throw new IOException(e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    // nothing
+                }
+            }
+        }
+    }
+
+    /**
      * 获取数据库connection连接
      * 
      * @return
@@ -98,56 +102,65 @@ public class DimensionConverterImpl implements IDimensionConverter{
      * @param dimension
      * @return
      */
-	private String buildCacheKey(BaseDimension dimension){
-		StringBuilder sb = new StringBuilder();
-		if(dimension instanceof DateDimension){
-			sb.append("date_dimension");
-			DateDimension date = (DateDimension) dimension;
-			sb.append(date.getYear()).append(date.getSeason()).append(date.getMonth());
-			sb.append(date.getWeek()).append(date.getDay()).append(date.getType());
-		}else if(dimension instanceof PlatformDimension){
-			sb.append("platform_dimension");
-			PlatformDimension platform = (PlatformDimension) dimension;
-			sb.append(platform.getPlatformName());
-		}else if(dimension instanceof BrowserDimension){
-			sb.append("browser_dimension");
-			BrowserDimension browser = (BrowserDimension) dimension;
-			sb.append(browser.getBrowserName()).append(browser.getBrowserVersion());
-		}
-		if(sb.length() == 0){
-			throw new RuntimeException("无法创建指定dimension的cachekey：" + dimension.getClass());
-		}
-		return sb.toString();
-	}
-	
-	/**
+    private String buildCacheKey(BaseDimension dimension) {
+        StringBuilder sb = new StringBuilder();
+        if (dimension instanceof DateDimension) {
+            sb.append("date_dimension");
+            DateDimension date = (DateDimension) dimension;
+            sb.append(date.getYear()).append(date.getSeason()).append(date.getMonth());
+            sb.append(date.getWeek()).append(date.getDay()).append(date.getType());
+        } else if (dimension instanceof PlatformDimension) {
+            sb.append("platform_dimension");
+            PlatformDimension platform = (PlatformDimension) dimension;
+            sb.append(platform.getPlatformName());
+        } else if (dimension instanceof BrowserDimension) {
+            sb.append("browser_dimension");
+            BrowserDimension browser = (BrowserDimension) dimension;
+            sb.append(browser.getBrowserName()).append(browser.getBrowserVersion());
+        } else if (dimension instanceof KpiDimension) {
+            sb.append("kpi_dimension");
+            KpiDimension kpi = (KpiDimension) dimension;
+            sb.append(kpi.getKpiName());
+        }
+
+        if (sb.length() == 0) {
+            throw new RuntimeException("无法创建指定dimension的cachekey：" + dimension.getClass());
+        }
+        return sb.toString();
+    }
+
+    /**
      * 设置参数
      * 
      * @param pstmt
      * @param dimension
      * @throws SQLException
      */
-	private void setArgs(PreparedStatement pstmt,BaseDimension dimension) throws SQLException{
-		int i = 0;
-		if(dimension instanceof DateDimension){
-			DateDimension date = (DateDimension) dimension;
-			pstmt.setInt(++i, date.getYear());
-			pstmt.setInt(++i, date.getSeason());
-			pstmt.setInt(++i, date.getMonth());
-			pstmt.setInt(++i, date.getWeek());
-			pstmt.setInt(++i, date.getDay());
-			pstmt.setString(++i, date.getType());
-			pstmt.setDate(++i, new Date(date.getCalendar().getTime()));
-		}else if(dimension instanceof PlatformDimension){
-			PlatformDimension platform = (PlatformDimension) dimension;
-			pstmt.setString(++i, platform.getPlatformName());
-		}else if(dimension instanceof BrowserDimension){
-			BrowserDimension browser = (BrowserDimension) dimension;
-			pstmt.setString(++i, browser.getBrowserName());
-			pstmt.setString(++i, browser.getBrowserVersion());
-		}
-	}
-	/**
+    private void setArgs(PreparedStatement pstmt, BaseDimension dimension) throws SQLException {
+        int i = 0;
+        if (dimension instanceof DateDimension) {
+            DateDimension date = (DateDimension) dimension;
+            pstmt.setInt(++i, date.getYear());
+            pstmt.setInt(++i, date.getSeason());
+            pstmt.setInt(++i, date.getMonth());
+            pstmt.setInt(++i, date.getWeek());
+            pstmt.setInt(++i, date.getDay());
+            pstmt.setString(++i, date.getType());
+            pstmt.setDate(++i, new Date(date.getCalendar().getTime()));
+        } else if (dimension instanceof PlatformDimension) {
+            PlatformDimension platform = (PlatformDimension) dimension;
+            pstmt.setString(++i, platform.getPlatformName());
+        } else if (dimension instanceof BrowserDimension) {
+            BrowserDimension browser = (BrowserDimension) dimension;
+            pstmt.setString(++i, browser.getBrowserName());
+            pstmt.setString(++i, browser.getBrowserVersion());
+        } else if (dimension instanceof KpiDimension) {
+            KpiDimension kpi = (KpiDimension) dimension;
+            pstmt.setString(++i, kpi.getKpiName());
+        }
+    }
+
+    /**
      * 创建date dimension相关sql
      * 
      * @return
@@ -178,6 +191,20 @@ public class DimensionConverterImpl implements IDimensionConverter{
         String insertSql = "INSERT INTO `dimension_browser`(`browser_name`, `browser_version`) VALUES(?, ?)";
         return new String[] { querySql, insertSql };
     }
+
+    /**
+     * 创建kpi dimension相关sql
+     * 
+     * @return
+     */
+    private String[] buildKpiSql() {
+        String querySql = "SELECT `id` FROM `dimension_kpi` WHERE `kpi_name` = ?";
+        String insertSql = "INSERT INTO `dimension_kpi`(`kpi_name`) VALUES(?)";
+        return new String[] { querySql, insertSql };
+    }
+
+    
+
     /**
      * 具体执行sql的方法
      * 
