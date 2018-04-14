@@ -20,6 +20,7 @@ public enum KpiType {
     HOURLY_ACTIVE_USER("hourly_active_user"), // 按小时统计活跃用户kpi
     HOURLY_SESSIONS("hourly_sessions"), // 按小时统计会话格式kpi
     HOURLY_SESSIONS_LENGTH("hourly_sessions_length"), // 按小时统计会话长度kpi
+    WEBSITE_PAGEVIEW("website_pageview"), // 统计浏览器维度的pv kpi
     ;
 
     public final String name;

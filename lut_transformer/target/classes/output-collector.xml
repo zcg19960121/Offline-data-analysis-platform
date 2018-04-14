@@ -70,4 +70,9 @@
 		<name>collector_hourly_sessions_length</name>
 		<value>com.lut.transformer.mr.sessions.SessionsCollector</value>
 	</property>	
+
+	<property>
+		<name>collector_website_pageview</name>
+		<value>com.lut.transformer.mr.pv.PageViewCollector</value>
+	</property>	
 </configuration>
