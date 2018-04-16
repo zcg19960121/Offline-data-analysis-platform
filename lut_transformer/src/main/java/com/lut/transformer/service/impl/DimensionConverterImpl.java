@@ -17,6 +17,7 @@ import com.lut.transformer.model.dim.base.BaseDimension;
 import com.lut.transformer.model.dim.base.BrowserDimension;
 import com.lut.transformer.model.dim.base.DateDimension;
 import com.lut.transformer.model.dim.base.KpiDimension;
+import com.lut.transformer.model.dim.base.LocationDimension;
 import com.lut.transformer.model.dim.base.PlatformDimension;
 import com.lut.transformer.service.IDimensionConverter;
 
@@ -63,6 +64,8 @@ public class DimensionConverterImpl implements IDimensionConverter{
                 sql = this.buildBrowserSql();
             } else if (dimension instanceof KpiDimension) {
                 sql = this.buildKpiSql();
+            } else if (dimension instanceof LocationDimension) {
+                sql = this.buildLocationSql();
             } else {
                 throw new IOException("不支持此dimensionid的获取:" + dimension.getClass());
             } 
@@ -121,6 +124,10 @@ public class DimensionConverterImpl implements IDimensionConverter{
             sb.append("kpi_dimension");
             KpiDimension kpi = (KpiDimension) dimension;
             sb.append(kpi.getKpiName());
+        } else if (dimension instanceof LocationDimension) {
+            sb.append("location_dimension");
+            LocationDimension location = (LocationDimension) dimension;
+            sb.append(location.getCountry()).append(location.getProvince()).append(location.getCity());
         }
 
         if (sb.length() == 0) {
@@ -157,6 +164,11 @@ public class DimensionConverterImpl implements IDimensionConverter{
         } else if (dimension instanceof KpiDimension) {
             KpiDimension kpi = (KpiDimension) dimension;
             pstmt.setString(++i, kpi.getKpiName());
+        } else if (dimension instanceof LocationDimension) {
+            LocationDimension location = (LocationDimension) dimension;
+            pstmt.setString(++i, location.getCountry());
+            pstmt.setString(++i, location.getProvince());
+            pstmt.setString(++i, location.getCity());
         }
     }
 
@@ -203,7 +215,16 @@ public class DimensionConverterImpl implements IDimensionConverter{
         return new String[] { querySql, insertSql };
     }
 
-    
+    /**
+     * 创建location dimension相关sql
+     * 
+     * @return
+     */
+    private String[] buildLocationSql() {
+        String querySql = "SELECT `id` FROM `dimension_location` WHERE `country` = ? AND `province` = ? AND `city` = ?";
+        String insertSql = "INSERT INTO `dimension_location`(`country`,`province`,`city`) VALUES(?,?,?)";
+        return new String[] { querySql, insertSql };
+    }
 
     /**
      * 具体执行sql的方法

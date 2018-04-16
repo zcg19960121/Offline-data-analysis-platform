@@ -1,31 +1,23 @@
 package com.lut.transformer.mr.nu;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
-import org.apache.hadoop.hbase.filter.MultipleColumnPrefixFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
-import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.util.Tool;
-import org.apache.hadoop.util.ToolRunner;
 import org.apache.log4j.Logger;
 
-import com.google.common.collect.Lists;
 import com.lut.common.DateEnum;
 import com.lut.common.EventLogConstants;
 import com.lut.common.EventLogConstants.EventEnum;
@@ -34,7 +26,7 @@ import com.lut.transformer.model.dim.StatsUserDimension;
 import com.lut.transformer.model.dim.base.DateDimension;
 import com.lut.transformer.model.value.map.TimeOutputValue;
 import com.lut.transformer.model.value.reduce.MapWritableValue;
-import com.lut.transformer.mr.TransformerOutputFormat;
+import com.lut.transformer.mr.TransformerBaseRunner;
 import com.lut.util.JdbcManager;
 import com.lut.util.TimeUtil;
 
@@ -43,66 +35,59 @@ import com.lut.util.TimeUtil;
  * @author gg
  *
  */
-public class NewInstallUserRunner implements Tool {
-	private static final Logger logger = Logger.getLogger(NewInstallUserRunner.class);
-	private Configuration conf = new Configuration();
-	
-	/**
-	 * 入口main方法
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		try {
-			ToolRunner.run(new Configuration(),new NewInstallUserRunner(), args);
-		} catch (Exception e) {
-			logger.error("运行计算新用户的job出现异常",e);
-			throw new RuntimeException(e);
-		}
-		
-	}
+public class NewInstallUserRunner extends TransformerBaseRunner {
+    private static final Logger logger = Logger.getLogger(NewInstallUserRunner.class);
 
-	@Override
-	public void setConf(Configuration conf) {
-		conf.addResource("output-collector.xml");
-        conf.addResource("query-mapping.xml");
-        conf.addResource("transformer-env.xml");
-        this.conf = HBaseConfiguration.create(conf);
+    /**
+     * 入口main方法
+     * 
+     * @param args
+     */
+    public static void main(String[] args) {
+        NewInstallUserRunner runner = new NewInstallUserRunner();
+        runner.setupRunner("new_install_user", NewInstallUserRunner.class, NewInstallUserMapper.class, NewInstallUserReducer.class, StatsUserDimension.class, TimeOutputValue.class, StatsUserDimension.class, MapWritableValue.class);
+        try {
+            runner.startRunner(args);
+        } catch (Exception e) {
+            logger.error("运行计算新用户的job出现异常", e);
+            throw new RuntimeException(e);
+        }
+    }
 
-	}
+    @Override
+    protected Filter fetchHbaseFilter() {
+        FilterList filterList = new FilterList();
+        // 过滤数据，只分析launch事件
+        filterList.addFilter(new SingleColumnValueFilter(Bytes.toBytes(EventLogConstants.EVENT_LOGS_FAMILY_NAME), Bytes.toBytes(EventLogConstants.LOG_COLUMN_NAME_EVENT_NAME), CompareOp.EQUAL, Bytes.toBytes(EventEnum.LAUNCH.alias)));
+        // 定义mapper中需要获取的列名
+        String[] columns = new String[] { EventLogConstants.LOG_COLUMN_NAME_EVENT_NAME, EventLogConstants.LOG_COLUMN_NAME_UUID, EventLogConstants.LOG_COLUMN_NAME_SERVER_TIME, EventLogConstants.LOG_COLUMN_NAME_PLATFORM, EventLogConstants.LOG_COLUMN_NAME_BROWSER_NAME, EventLogConstants.LOG_COLUMN_NAME_BROWSER_VERSION };
+        filterList.addFilter(this.getColumnFilter(columns));
+        return filterList;
+    }
 
-	@Override
-	public Configuration getConf() {
-		return this.conf;
-	}
-
-	@Override
-	public int run(String[] args) throws Exception {
-		Configuration conf = this.getConf();
-		//处理参数
-		this.processArgs(conf,args);
-		Job job = Job.getInstance(conf,"new_install_user");
-		//本地运行
-		TableMapReduceUtil.initTableMapperJob(initScans(job), NewInstallUserMapper.class, StatsUserDimension.class, 
-				TimeOutputValue.class, job,false);
-		//集群运行:本地提交和打包提交
-		/*TableMapReduceUtil.initTableMapperJob(initScans(job), NewInstallUserMapper.class, 
-				StatsUserDimension.class, TimeOutputValue.class, job);*/
-		job.setJarByClass(NewInstallUserRunner.class);
-		job.setReducerClass(NewInstallUserReducer.class);
-		job.setOutputKeyClass(StatsUserDimension.class);
-		job.setOutputValueClass(MapWritableValue.class);
-		job.setOutputFormatClass(TransformerOutputFormat.class);
-		if(job.waitForCompletion(true)){
-			//执行成功，需要计算总用户
-			this.calculateTotalUsers(conf);
-			return 0;
-		}else{
-			return -1;
-		}
-	}
+    @Override
+    protected void afterRunJob(Job job, Throwable error) throws IOException {
+        try {
+            if (error == null && job.isSuccessful()) {
+                // job运行没有异常，而且运行成功，那么进行计算total user的代码
+                this.calculateTotalUsers(job.getConfiguration());
+            } else if (error == null) {
+                // job运行没有产生异常，但是运行失败
+                throw new RuntimeException("job 运行失败");
+            }
+        } catch (Throwable e) {
+            if (error != null) {
+                error = e;
+            }
+            throw new IOException("调用afterRunJob产生异常", e);
+        } finally {
+            super.afterRunJob(job, error);
+        }
+    }
 
 	/**
 	 * 计算总用户
+	 *
 	 * @param conf
 	 */
 	private void calculateTotalUsers(Configuration conf) {
@@ -152,6 +137,7 @@ public class NewInstallUserRunner implements Tool {
 			
 			//获取昨天的原始数据，存储格式为:platformid = totalusers
 			Map<String, Integer> oldValueMap = new HashMap<>();
+			
 			//开始更新stats_user
 			if(yesterdayDimensionId > -1){
 				pstmt = conn.prepareStatement("select `platform_dimension_id`,`total_install_users` from `stats_user` where `date_dimension_id`=?");
@@ -230,73 +216,7 @@ public class NewInstallUserRunner implements Tool {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * 处理参数
-	 * @param conf
-	 * @param args
-	 */
-	private void processArgs(Configuration conf,String[] args){
-		String date = null;
-		for(int i = 0;i < args.length;i++){
-			if("-d".equals(args[i])){
-				if(i + 1 < args.length){
-					date = args[++i];
-					break;
-				}
-			}
-		}
-		//要求date格式为:yyyy-MM-dd
-		if(StringUtils.isBlank(date) || !TimeUtil.isValidateRunningDate(date)){
-			//date是一个无效时间数据
-			date = TimeUtil.getYesterday();//默认时间是昨天
-		}
-		conf.set(GlobalConstants.RUNNING_DATE_PARAMES, date);
-	}
-	
-	/**
-	 * 初始化集合
-	 * @param job
-	 * @return
-	 */
-	private List<Scan> initScans(Job job){
-		//时间戳+...
-		Configuration conf = job.getConfiguration();
-		//获取运行时间:yyyy-MM-dd
-		String date = conf.get(GlobalConstants.RUNNING_DATE_PARAMES);
-		long startDate = TimeUtil.parseString2Long(date);
-		long endDate = startDate + GlobalConstants.DAY_OF_MILLISECONDS;
-		
-		Scan scan = new Scan();
-		//定义hbase扫描的开始rowkey和结束rowkey
-		scan.setStartRow(Bytes.toBytes("" + startDate));
-		scan.setStopRow(Bytes.toBytes("" + endDate));
-		
-		FilterList filterList = new FilterList();
-		//过滤数据，只分析launch事件
-		filterList.addFilter(new SingleColumnValueFilter(Bytes.toBytes(EventLogConstants.EVENT_LOGS_FAMILY_NAME),
-				Bytes.toBytes(EventLogConstants.LOG_COLUMN_NAME_EVENT_NAME), 
-				CompareOp.EQUAL, Bytes.toBytes(EventEnum.LAUNCH.alias)));
-		//定义mapper中需要获取的列名
-		String[] columns = new String[]{EventLogConstants.LOG_COLUMN_NAME_EVENT_NAME, 
-				EventLogConstants.LOG_COLUMN_NAME_UUID, 
-				EventLogConstants.LOG_COLUMN_NAME_SERVER_TIME, 
-				EventLogConstants.LOG_COLUMN_NAME_PLATFORM, 
-				EventLogConstants.LOG_COLUMN_NAME_BROWSER_NAME, 
-				EventLogConstants.LOG_COLUMN_NAME_BROWSER_VERSION};
-		filterList.addFilter(this.getColumnFilter(columns));
-		scan.setAttribute(Scan.SCAN_ATTRIBUTES_TABLE_NAME, Bytes.toBytes(EventLogConstants.HBASE_NAME_EVENT_LOGS));
-		scan.setFilter(filterList);
-		return Lists.newArrayList(scan);
-	}
-	private Filter getColumnFilter(String[] columns){
-		int length = columns.length;
-		byte[][] filter = new byte[length][];
-		for(int i = 0;i < length;i++){
-			filter[i] = Bytes.toBytes(columns[i]);
-		}
-		return new MultipleColumnPrefixFilter(filter);
-	}
+}
+
 
 }
