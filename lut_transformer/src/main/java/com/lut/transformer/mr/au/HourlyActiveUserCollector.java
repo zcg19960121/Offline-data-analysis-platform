@@ -14,7 +14,7 @@ import com.lut.transformer.model.dim.base.BaseDimension;
 import com.lut.transformer.model.value.BaseStatsValueWritable;
 import com.lut.transformer.model.value.reduce.MapWritableValue;
 import com.lut.transformer.mr.IOutputCollector;
-import com.lut.transformer.service.IDimensionConverter;
+import com.lut.transformer.service.rpc.IDimensionConverter;
 
 public class HourlyActiveUserCollector implements IOutputCollector {
 

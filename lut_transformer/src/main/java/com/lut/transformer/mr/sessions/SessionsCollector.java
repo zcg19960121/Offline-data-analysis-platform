@@ -14,7 +14,7 @@ import com.lut.transformer.model.dim.base.KpiDimension;
 import com.lut.transformer.model.value.BaseStatsValueWritable;
 import com.lut.transformer.model.value.reduce.MapWritableValue;
 import com.lut.transformer.mr.IOutputCollector;
-import com.lut.transformer.service.IDimensionConverter;
+import com.lut.transformer.service.rpc.IDimensionConverter;
 public class SessionsCollector implements IOutputCollector{
 	@Override
     public void collect(Configuration conf, BaseDimension key, BaseStatsValueWritable value, PreparedStatement pstmt, IDimensionConverter converter) throws SQLException, IOException {

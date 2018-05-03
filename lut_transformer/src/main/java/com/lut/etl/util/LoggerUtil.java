@@ -34,7 +34,7 @@ public class LoggerUtil {
 	public static Map<String,String> handleLog(String logText){
 		Map<String,String> clientInfo = new HashMap<>();
 		if(StringUtils.isNotBlank(logText)){
-			String[] splits = logText.split(EventLogConstants.LOG_SEPARTIOR);
+            String[] splits = logText.trim().split(EventLogConstants.LOG_SEPARTIOR);
 			if(splits.length == 4){
 				//日志格式为: ip^A服务器时间^Ahost^A请求参数
 				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_IP, splits[0].trim());
@@ -58,6 +58,48 @@ public class LoggerUtil {
 		}
 		return clientInfo;
 	}
+	
+	/**
+	 * 处理ip地址
+	 * 
+	 * @param clientInfo
+	 */
+	private static void handleIp(Map<String, String> clientInfo) {
+		if(clientInfo.containsKey(EventLogConstants.LOG_COLUMN_NAME_IP)){
+			String ip = clientInfo.get(EventLogConstants.LOG_COLUMN_NAME_IP);
+			RegionInfo regionInfo = ipSeekerExt.analyticIp(ip);
+			if(regionInfo != null){
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_COUNTRY, regionInfo.getCountry());
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_PROVINCE, regionInfo.getProvince());
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_CITY, regionInfo.getCity());
+			}
+		}
+		
+	}
+	
+	
+	
+	/**
+     * 处理浏览器的userAgent信息
+     * 
+     * @param clientInfo
+     */
+	private static void handleUserAgent(Map<String, String> clientInfo) {
+		if(clientInfo.containsKey(EventLogConstants.LOG_COLUMN_NAME_USER_AGENT)){
+			UserAgentInfo userAgentInfo = UserAgentUtil.analyticUserAgent(clientInfo.get
+					(EventLogConstants.LOG_COLUMN_NAME_USER_AGENT));
+			if(userAgentInfo != null){
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_OS_NAME, userAgentInfo.getOsName());
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_OS_VERSION, userAgentInfo.getOsVersion());
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_BROWSER_NAME, userAgentInfo.getBrowserName());
+				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_BROWSER_VERSION, userAgentInfo.getBrowserVersion());
+			}
+		}
+		
+	}
+	
+	
+	
 	 /**
      * 处理请求参数
      * 
@@ -68,6 +110,7 @@ public class LoggerUtil {
 		if(StringUtils.isNotBlank(requestBody)){
 			String[] requestParams = requestBody.split("&");
 			for(String param : requestParams){
+                if (StringUtils.isNotBlank(param)) {
 				int index = param.indexOf("=");
 				if(index < 0){
 					logger.warn("无法解析的参数：" + param + "，请求参数为：" + requestBody);
@@ -89,41 +132,8 @@ public class LoggerUtil {
 		}
 		
 	}
-	/**
-     * 处理浏览器的userAgent信息
-     * 
-     * @param clientInfo
-     */
-	private static void handleUserAgent(Map<String, String> clientInfo) {
-		if(clientInfo.containsKey(EventLogConstants.LOG_COLUMN_NAME_USER_AGENT)){
-			UserAgentInfo userAgentInfo = UserAgentUtil.analyticUserAgent(clientInfo.get
-					(EventLogConstants.LOG_COLUMN_NAME_USER_AGENT));
-			if(userAgentInfo != null){
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_OS_NAME, userAgentInfo.getOsName());
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_OS_VERSION, userAgentInfo.getOsVersion());
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_BROWSER_NAME, userAgentInfo.getBrowserName());
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_BROWSER_VERSION, userAgentInfo.getBrowserVersion());
-			}
-		}
-		
-	}
-	/**
-	 * 处理ip地址
-	 * 
-	 * @param clientInfo
-	 */
-	private static void handleIp(Map<String, String> clientInfo) {
-		if(clientInfo.containsKey(EventLogConstants.LOG_COLUMN_NAME_IP)){
-			String ip = clientInfo.get(EventLogConstants.LOG_COLUMN_NAME_IP);
-			RegionInfo regionInfo = ipSeekerExt.analyticIp(ip);
-			if(regionInfo != null){
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_COUNTRY, regionInfo.getCountry());
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_PROVINCE, regionInfo.getProvince());
-				clientInfo.put(EventLogConstants.LOG_COLUMN_NAME_CITY, regionInfo.getCity());
-			}
-		}
-		
-	}
+    }
+	
 	
 	
 }

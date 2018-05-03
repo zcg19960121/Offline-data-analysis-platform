@@ -2,7 +2,6 @@ package com.lut.transformer.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URL;
 
 /**
  * url工具类

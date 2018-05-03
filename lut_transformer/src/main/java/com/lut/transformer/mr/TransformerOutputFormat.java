@@ -21,8 +21,8 @@ import com.lut.common.GlobalConstants;
 import com.lut.common.KpiType;
 import com.lut.transformer.model.dim.base.BaseDimension;
 import com.lut.transformer.model.value.BaseStatsValueWritable;
-import com.lut.transformer.service.IDimensionConverter;
-import com.lut.transformer.service.impl.DimensionConverterImpl;
+import com.lut.transformer.service.rpc.IDimensionConverter;
+import com.lut.transformer.service.rpc.client.DimensionConverterClient;
 import com.lut.util.JdbcManager;
 
 /**
@@ -38,7 +38,7 @@ public class TransformerOutputFormat extends OutputFormat<BaseDimension, BaseSta
 			throws IOException, InterruptedException {
 		Configuration conf = context.getConfiguration();
 		Connection conn = null;
-		IDimensionConverter converter = new DimensionConverterImpl();
+		IDimensionConverter converter = DimensionConverterClient.createDimensionConverter(conf);
 		try {
 			conn = JdbcManager.getConnection(conf,GlobalConstants.WAREHOUSE_OF_REPORT);
 			conn.setAutoCommit(false);
@@ -138,14 +138,18 @@ public class TransformerOutputFormat extends OutputFormat<BaseDimension, BaseSta
                             // nothing
                         }
                     }
-                    if (conn != null)
+                    if (conn != null) {
                         try {
                             conn.close();
                         } catch (Exception e) {
                             // nothing
                         }
+                    }
                 }
             }
+
+            // 关闭rpc连接
+            DimensionConverterClient.stopDimensionConverterProxy(this.converter);
         }
 
     }
