@@ -68,7 +68,7 @@ public class AnalyserLogDataRunner implements Tool{
          //1.集群上运行，打成jar运行(要求addDependencyJars参数为true，默认就是true)
          //TableMapReduceUtil.initTableReducerJob(EventLogConstants.HBASE_NAME_EVENT_LOGS, null, job);
          //2.本地运行，要求参数addDependencyJars为false,提交到集群运行需要为true。如果在使用了EJob之后还报错ClassNotFound,最简单的办法是将依赖的jar包全部拷贝至集群$JAVA_HOME/jre/lib/ext目录即可
-         TableMapReduceUtil.initTableReducerJob(EventLogConstants.HBASE_NAME_EVENT_LOGS,null, job, null, null, null, null, true);
+         TableMapReduceUtil.initTableReducerJob(EventLogConstants.HBASE_NAME_EVENT_LOGS,null, job, null, null, null, null, false);
          job.setNumReduceTasks(0);
          //设置输入路径
          this.setJobInputPaths(job);

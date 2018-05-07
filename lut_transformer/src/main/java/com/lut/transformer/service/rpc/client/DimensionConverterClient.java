@@ -75,20 +75,13 @@ public class DimensionConverterClient {
 				try {
 					br.close();
                 } catch (Exception ee) {
-					//nothing
-				}
-			}
-			if(fs != null){
-				try {
-					fs.close();
-				} catch (Exception e) {
-					//nothing
-				}
-			}
-		}
-	}
-	
-	/**
+                    // nothing
+                }
+            }
+        }
+    }
+
+    /**
      * 内部代理类
      * 
      * @author gg
