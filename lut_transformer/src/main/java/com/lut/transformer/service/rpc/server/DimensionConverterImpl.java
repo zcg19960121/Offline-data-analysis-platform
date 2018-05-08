@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import com.lut.transformer.model.dim.base.BaseDimension;
 import com.lut.transformer.model.dim.base.BrowserDimension;
 import com.lut.transformer.model.dim.base.DateDimension;
+import com.lut.transformer.model.dim.base.EventDimension;
 import com.lut.transformer.model.dim.base.KpiDimension;
 import com.lut.transformer.model.dim.base.LocationDimension;
 import com.lut.transformer.model.dim.base.PlatformDimension;
@@ -72,6 +73,8 @@ public class DimensionConverterImpl implements IDimensionConverter{
                 sql = this.buildKpiSql();
             } else if (dimension instanceof LocationDimension) {
                 sql = this.buildLocationSql();
+            } else if (dimension instanceof EventDimension) {
+                sql = this.buildEventSql();
             } else {
                 throw new IOException("不支持此dimensionid的获取:" + dimension.getClass());
             } 
@@ -134,6 +137,10 @@ public class DimensionConverterImpl implements IDimensionConverter{
             sb.append("location_dimension");
             LocationDimension location = (LocationDimension) dimension;
             sb.append(location.getCountry()).append(location.getProvince()).append(location.getCity());
+        } else if (dimension instanceof EventDimension) {
+            sb.append("event_dimension");
+            EventDimension event = (EventDimension) dimension;
+            sb.append(event.getCategory()).append(event.getAction());
         }
 
         if (sb.length() == 0) {
@@ -175,6 +182,10 @@ public class DimensionConverterImpl implements IDimensionConverter{
             pstmt.setString(++i, location.getCountry());
             pstmt.setString(++i, location.getProvince());
             pstmt.setString(++i, location.getCity());
+        } else if (dimension instanceof EventDimension) {
+            EventDimension event = (EventDimension) dimension;
+            pstmt.setString(++i, event.getCategory());
+            pstmt.setString(++i, event.getAction());
         }
     }
 
@@ -229,6 +240,17 @@ public class DimensionConverterImpl implements IDimensionConverter{
     private String[] buildLocationSql() {
         String querySql = "SELECT `id` FROM `dimension_location` WHERE `country` = ? AND `province` = ? AND `city` = ?";
         String insertSql = "INSERT INTO `dimension_location`(`country`,`province`,`city`) VALUES(?,?,?)";
+        return new String[] { querySql, insertSql };
+    }
+
+    /**
+     * 创建event dimension相关sql
+     * 
+     * @return
+     */
+    private String[] buildEventSql() {
+        String querySql = "SELECT `id` FROM `dimension_event` WHERE `category` = ? AND `action` = ?";
+        String insertSql = "INSERT INTO `dimension_event`(`category`,`action`) VALUES(?,?)";
         return new String[] { querySql, insertSql };
     }
 
