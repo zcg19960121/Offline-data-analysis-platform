@@ -6,7 +6,7 @@ with serdeproperties('hbase.columns.mapping'=':key,info:pl,info:en,info:s_time,i
 tblproperties('hbase.table.name'='event_logs');
 
 -- 2. 创建mysql在hive中的对应表
-CREATE TABLE `stats_view_depth` (`platform_dimension_id` bigint ,`data_dimension_id` bigint , `kpi_dimension_id` bigint , `pv1` bigint , `pv2` bigint , `pv3` bigint , `pv4` bigint , `pv5_10` bigint , `pv10_30` bigint , `pv30_60` bigint , `pv60_plus` bigint , `created` string);
+CREATE TABLE `stats_view_depth` (`platform_dimension_id` bigint ,`date_dimension_id` bigint , `kpi_dimension_id` bigint , `pv1` bigint , `pv2` bigint , `pv3` bigint , `pv4` bigint , `pv5_10` bigint , `pv10_30` bigint , `pv30_60` bigint , `pv60_plus` bigint , `created` string);
 
 -- 3. hive中创建临时表
 CREATE TABLE `stats_view_depth_tmp`(`pl` string, `date` string, `col` string, `ct` bigint);
@@ -53,7 +53,7 @@ from tmp
 insert overwrite table stats_view_depth select platform_convert(pl),date_convert(date),5,sum(pv1),sum(pv2),sum(pv3),sum(pv4),sum(pv5_10),sum(pv10_30),sum(pv30_60),sum(pv60_plus),'2015-12-13' group by pl,date;
 
 -- 7. sqoop脚步编写(统计用户角度)
-sqoop export --connect jdbc:mysql://hadoop-work:3306/report --username hive --password hive --table stats_view_depth --export-dir /hive/stats_view_depth/* --input-fields-terminated-by "\\01" --update-mode allowinsert --update-key platform_dimension_id,data_dimension_id,kpi_dimension_id
+sqoop export --connect jdbc:mysql://hadoop-work:3306/report --username hive --password hive --table stats_view_depth --export-dir /hive/stats_view_depth/* --input-fields-terminated-by "\\01" --update-mode allowinsert --update-key platform_dimension_id,date_dimension_id,kpi_dimension_id
 
 -- 8. hql编写(统计会话角度的浏览深度)<注意：时间为外部给定>
 from (
@@ -88,6 +88,6 @@ from tmp
 insert overwrite table stats_view_depth select platform_convert(pl),date_convert(date),6,sum(pv1),sum(pv2),sum(pv3),sum(pv4),sum(pv5_10),sum(pv10_30),sum(pv30_60),sum(pv60_plus),'2015-12-13' group by pl,date;
 
 -- 9. sqoop脚步编写(统计会话角度)
-sqoop export --connect jdbc:mysql://hadoop-work:3306/report --username hive --password hive --table stats_view_depth --export-dir /hive/stats_view_depth/* --input-fields-terminated-by "\\01" --update-mode allowinsert --update-key platform_dimension_id,data_dimension_id,kpi_dimension_id
+sqoop export --connect jdbc:mysql://hadoop-work:3306/report --username hive --password hive --table stats_view_depth --export-dir /hive/stats_view_depth/* --input-fields-terminated-by "\\01" --update-mode allowinsert --update-key platform_dimension_id,date_dimension_id,kpi_dimension_id
 
 -- 10. shell脚步编写

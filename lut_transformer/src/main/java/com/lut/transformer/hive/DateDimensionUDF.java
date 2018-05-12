@@ -37,7 +37,7 @@ public class DateDimensionUDF extends UDF{
 			public void run() {
 				try {
 					DimensionConverterClient.stopDimensionConverterProxy(converter);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					//nothing
 				}
 				

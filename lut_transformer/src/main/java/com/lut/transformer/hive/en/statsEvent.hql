@@ -6,7 +6,7 @@ with serdeproperties('hbase.columns.mapping'=':key,info:pl,info:en,info:s_time,i
 tblproperties('hbase.table.name'='event_logs');
 
 -- 2. 创建mysql在hive中的对应表
-CREATE TABLE `stats_event` (`platform_dimension_id` bigint ,`data_dimension_id` bigint , `event_dimension_id` bigint , `times` bigint , `created` string);
+CREATE TABLE `stats_event` (`platform_dimension_id` bigint ,`date_dimension_id` bigint , `event_dimension_id` bigint , `times` bigint , `created` string);
 
 -- 3. 编写UDF(eventdimension)<需要注意，要删除DimensionConvertClient类中所有FileSystem关闭的操作>
 

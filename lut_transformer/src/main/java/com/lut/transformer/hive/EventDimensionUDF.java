@@ -13,6 +13,12 @@ import com.lut.transformer.model.dim.base.EventDimension;
 import com.lut.transformer.service.rpc.IDimensionConverter;
 import com.lut.transformer.service.rpc.client.DimensionConverterClient;
 
+/**
+ * 计算event相关数据的udf
+ * 
+ * @author gg
+ *
+ */
 public class EventDimensionUDF extends UDF {
 	private IDimensionConverter converter = null;
 	
@@ -38,6 +44,15 @@ public class EventDimensionUDF extends UDF {
 		}));
 	}
 	
+    /**
+     * 根据给定的category和action获取对应的id
+     * 
+     * @param category
+     *            event的category名称
+     * @param action
+     *            event的action名称
+     * @return
+     */
 	public IntWritable evaluate(Text category,Text action){
 		String ca = category.toString();
 		String ac = action.toString();

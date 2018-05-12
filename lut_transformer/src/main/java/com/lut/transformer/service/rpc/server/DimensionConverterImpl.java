@@ -16,10 +16,12 @@ import org.apache.log4j.Logger;
 
 import com.lut.transformer.model.dim.base.BaseDimension;
 import com.lut.transformer.model.dim.base.BrowserDimension;
+import com.lut.transformer.model.dim.base.CurrencyTypeDimension;
 import com.lut.transformer.model.dim.base.DateDimension;
 import com.lut.transformer.model.dim.base.EventDimension;
 import com.lut.transformer.model.dim.base.KpiDimension;
 import com.lut.transformer.model.dim.base.LocationDimension;
+import com.lut.transformer.model.dim.base.PaymentTypeDimension;
 import com.lut.transformer.model.dim.base.PlatformDimension;
 import com.lut.transformer.service.rpc.IDimensionConverter;
 
@@ -75,6 +77,10 @@ public class DimensionConverterImpl implements IDimensionConverter{
                 sql = this.buildLocationSql();
             } else if (dimension instanceof EventDimension) {
                 sql = this.buildEventSql();
+            } else if (dimension instanceof CurrencyTypeDimension) {
+                sql = this.buildCurrencyTypeSql();
+            } else if (dimension instanceof PaymentTypeDimension){
+                sql = this.buildPaymentTypeSql();
             } else {
                 throw new IOException("不支持此dimensionid的获取:" + dimension.getClass());
             } 
@@ -141,6 +147,14 @@ public class DimensionConverterImpl implements IDimensionConverter{
             sb.append("event_dimension");
             EventDimension event = (EventDimension) dimension;
             sb.append(event.getCategory()).append(event.getAction());
+        } else if (dimension instanceof CurrencyTypeDimension) {
+            sb.append("currency_type_dimension");
+            CurrencyTypeDimension ctd = (CurrencyTypeDimension) dimension;
+            sb.append(ctd.getCurrencyName());
+        } else if (dimension instanceof PaymentTypeDimension) {
+            sb.append("payment_type_dimension");
+            PaymentTypeDimension ptd = (PaymentTypeDimension) dimension;
+            sb.append(ptd.getPaymentType());
         }
 
         if (sb.length() == 0) {
@@ -186,6 +200,12 @@ public class DimensionConverterImpl implements IDimensionConverter{
             EventDimension event = (EventDimension) dimension;
             pstmt.setString(++i, event.getCategory());
             pstmt.setString(++i, event.getAction());
+        } else if (dimension instanceof CurrencyTypeDimension) {
+            CurrencyTypeDimension ctd = (CurrencyTypeDimension) dimension;
+            pstmt.setString(++i, ctd.getCurrencyName());
+        } else if (dimension instanceof PaymentTypeDimension) {
+            PaymentTypeDimension ptd = (PaymentTypeDimension) dimension;
+            pstmt.setString(++i, ptd.getPaymentType());
         }
     }
 
@@ -251,6 +271,28 @@ public class DimensionConverterImpl implements IDimensionConverter{
     private String[] buildEventSql() {
         String querySql = "SELECT `id` FROM `dimension_event` WHERE `category` = ? AND `action` = ?";
         String insertSql = "INSERT INTO `dimension_event`(`category`,`action`) VALUES(?,?)";
+        return new String[] { querySql, insertSql };
+    }
+
+    /**
+     * 创建currency type dimension相关sql
+     * 
+     * @return
+     */
+    private String[] buildCurrencyTypeSql() {
+        String querySql = "SELECT `id` FROM `dimension_currency_type` WHERE `currency_name` = ?";
+        String insertSql = "INSERT INTO `dimension_currency_type`(`currency_name`) VALUES(?)";
+        return new String[] { querySql, insertSql };
+    }
+
+    /**
+     * 创建payment type dimension相关sql
+     * 
+     * @return
+     */
+    private String[] buildPaymentTypeSql() {
+        String querySql = "SELECT `id` FROM `dimension_payment_type` WHERE `payment_type` = ?";
+        String insertSql = "INSERT INTO `dimension_payment_type`(`payment_type`) VALUES(?)";
         return new String[] { querySql, insertSql };
     }
 
